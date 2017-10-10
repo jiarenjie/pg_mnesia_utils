@@ -28,7 +28,11 @@ start_link() ->
 
 %% Child :: {Id,StartFunc,Restart,Shutdown,Type,Modules}
 init([]) ->
-    {ok, { {one_for_all, 0, 1}, []} }.
+    RestartStrategy = {one_for_one, 4, 60},
+    Children = [{pg_mnesia_utils,
+        {pg_mnesia_utils, start_link, []},
+        permanent, 2000, supervisor, [pg_mnesia_utils]}],
+    {ok, {RestartStrategy, Children}}.
 
 %%====================================================================
 %% Internal functions
