@@ -29,9 +29,9 @@ init([]) ->
 
 backup(TableName, FileName) ->
   gen_server:cast(?SERVER, {backup, TableName, FileName}).
-restore(M, FileName) ->
+restore(TableName, FileName) ->
   case filelib:is_regular(FileName) of
-    true -> gen_server:cast(?SERVER, {restore, M, FileName});
+    true -> gen_server:cast(?SERVER, {restore, TableName, FileName});
     _ -> lager:error(["file : ~p is not exis!!!", [FileName]]),
       ok
   end.
@@ -76,7 +76,7 @@ handle_cast({restore, TableName, FileName},#state{} = State) ->
   lager:info("restore table: ~p to file :~ts start", [TableName, FileName]),
   F = fun(Bin) ->
     Lists = csv_parser:parse(Config, Bin),
-    Config2 = csv_table_deal:table_deal_config(TableName),
+    Config2 = table_deal_config(TableName),
     F2 = fun(Repo, Acc) ->
       Mode = to_mode(Repo, Fields, Config2, save),
 %%      lager:debug("Mode:~p",[Mode]),
