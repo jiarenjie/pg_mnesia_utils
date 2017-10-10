@@ -169,7 +169,9 @@ do_out_2_model_one_field({Value, F}, save) when is_function(F) ->
 %%================================================================================================
 
 save(TableName,Mode, Fields) ->
+  Map = maps:from_list(Mode),
+  
   %% 将map 转换为 能保存的 touple
-  Repo = erlang:list_to_tuple([TableName | maps:values(Mode)]),
+  Repo = erlang:list_to_tuple([TableName | maps:values(Map)]),
   ok = mnesia:dirty_write(TableName,Repo)
   .
