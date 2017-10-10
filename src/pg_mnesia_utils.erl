@@ -9,14 +9,16 @@
 -module(pg_mnesia_utils).
 -author("jiarj").
 -behaviour(gen_server).
--compile(export_all).
 -include_lib("stdlib/include/qlc.hrl").
 -include("include/tableConfig.hrl").
-%% API
--export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 
 -define(SERVER, ?MODULE).
+
 -record(state, {}).
+%% API
+-compile(export_all).
+
+
 
 start_link() ->
   gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
@@ -67,7 +69,6 @@ handle_cast({backup, TableName, FileName}, #state{} = State) ->
   lager:debug("Write ~p lines to file:~ts", [SubTotal + N, FileName]),
   csv_parser:write_to_file(FileName, Rest, Fields, Delimit_field, Delimit_line, [append]),
   lager:info("Write table: ~p to file : ~ts success,total: ~p", [TableName, FileName, SubTotal + N]),
-  {N, Rest, SubTotal},
   {noreply, State};
 handle_cast({restore, TableName, FileName},#state{} = State) ->
   Config = table_read_config(TableName),
