@@ -107,7 +107,7 @@ table_deal_config(mcht_txn_acc) ->
     month_date => binary,
     acc => integer
   };
-table_deal_config(backend_users) ->
+table_deal_config(users) ->
   #{
     id => integer,
     name => binary,
@@ -347,7 +347,7 @@ table_read_config(mcht_txn_acc) ->
     , delimit_field => [<<$^, $^>>]
     , delimit_line => [<<$$, $\n>>]
   };
-table_read_config(backend_users) ->
+table_read_config(users) ->
 %%  [id,name,email,password,role,status,last_update_ts, last_login_ts]
   #{
     field_map => #{
