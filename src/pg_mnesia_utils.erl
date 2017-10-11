@@ -104,12 +104,12 @@ code_change(_OldVsn, State, _Extra) ->
 
 repo_to_mode(Repo,Fields, Config, Operate) ->
   Map = repo_to_map(Repo,Fields),
-  lager:debug("Map = ~p", [Map]),
+%%  lager:debug("Map = ~p", [Map]),
   to_mode(Map,Fields,Config,Operate).
 
 repo_to_map(Repo, Fields) ->
   ValueList = tl(tuple_to_list(Repo)),
-  lager:debug("ValueList = ~p", [ValueList]),
+%%  lager:debug("ValueList = ~p", [ValueList]),
   List = lists:zip(Fields, ValueList),
   maps:from_list(List).
 
@@ -171,8 +171,10 @@ do_out_2_model_one_field({Value, F}, save) when is_function(F) ->
 
 save(TableName,Mode, Fields) ->
   Map = maps:from_list(Mode),
-
+  F = fun(Field) ->
+    maps:get(Field,Map)
+    end,
+  Lists = lists:map(F,Fields),
   %% 将map 转换为 能保存的 touple
-  Repo = erlang:list_to_tuple([TableName | maps:values(Map)]),
-  ok = mnesia:dirty_write(TableName,Repo)
-  .
+  Repo = erlang:list_to_tuple([ TableName | Lists ]),
+  ok = mnesia:dirty_write(TableName,Repo).
