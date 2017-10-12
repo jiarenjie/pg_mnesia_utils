@@ -47,7 +47,14 @@ handle_cast({backup, TableName, FileName}, #state{} = State) ->
   Table_read_config = table_read_config(TableName),
   Delimit_field = maps:get(delimit_field, Table_read_config),
   Delimit_line = maps:get(delimit_line, Table_read_config),
-  file:write_file(FileName, [], [write]),
+
+  %添加文件头
+  ValueList = lists:map(fun(Key) -> atom_to_binary(Key,utf8) end, Fields),
+  %ValueList = maps:values(Repo),
+  List = lists:join(Delimit_field, ValueList),
+  List1 = lists:append(List, [Delimit_line]),
+
+  file:write_file(FileName, List1, [write]),
   LinesGap = 500,
   lager:info("backup table: ~p from file : ~ts start", [TableName, FileName]),
 
@@ -121,11 +128,11 @@ to_mode(X, Fields, Config, Operate) ->
   VL
 .
 out_2_model_one_field(Field, {Acc, Model2OutMap, PL, Operate}) when is_atom(Field), is_list(Acc), is_map(Model2OutMap) ->
-  Config = maps:get(Field, Model2OutMap),
+  Config = maps:get(Field, Model2OutMap,undefined),
 
 %%  lager:debug("Config=~p,Field=~p", [Config, Field]),
 
-  Value = do_out_2_model_one_field({maps:get(Field, PL), Config}, Operate),
+  Value = do_out_2_model_one_field({maps:get(Field, PL,<<"undefined">>), Config}, Operate),
   %% omit undefined key/value , which means not appear in PL
 
   AccNew = [{Field, Value} | Acc],

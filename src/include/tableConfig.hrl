@@ -307,145 +307,157 @@ table_read_config(ums_reconcile_result) ->
 %%    cooperate_mcht_id,up_txn_seq,ums_order_id,memo]
   #{
     field_map => #{
-      id => <<"column1">>
-      , settlement_date => <<"column2">>
-      , txn_date => <<"column3">>
-      , txn_time => <<"column4">>
-      , ums_mcht_id => <<"column5">>
-      , term_id => <<"column6">>
+      id => <<"id">>
+      , settlement_date => <<"settlement_date">>
+      , txn_date => <<"txn_date">>
+      , txn_time => <<"txn_time">>
+      , ums_mcht_id => <<"ums_mcht_id">>
+      , term_id => <<"term_id">>
 
-      , bank_card_no => <<"column7">>
-      , txn_amt => <<"column8">>
-      , txn_type => <<"column9">>
-      , txn_fee => <<"column10">>
-      , term_batch_no => <<"column11">>
+      , bank_card_no => <<"bank_card_no">>
+      , txn_amt => <<"txn_amt">>
+      , txn_type => <<"txn_type">>
+      , txn_fee => <<"txn_fee">>
+      , term_batch_no => <<"term_batch_no">>
 
-      , term_seq => <<"column12">>
-      , sys_trace_no => <<"column13">>
-      , ref_id => <<"column14">>
-      , auth_resp_code => <<"column15">>
-      , cooperate_fee => <<"column16">>
+      , term_seq => <<"term_seq">>
+      , sys_trace_no => <<"sys_trace_no">>
+      , ref_id => <<"ref_id">>
+      , auth_resp_code => <<"auth_resp_code">>
+      , cooperate_fee => <<"cooperate_fee">>
 
-      , cooperate_mcht_id => <<"column17">>
-      , up_txn_seq => <<"column18">>
-      , ums_order_id => <<"column19">>
-      , memo => <<"column20">>
+      , cooperate_mcht_id => <<"cooperate_mcht_id">>
+      , up_txn_seq => <<"up_txn_seq">>
+      , ums_order_id => <<"ums_order_id">>
+      , memo => <<"memo">>
     }
     , delimit_field => [<<$^, $^>>]
     , delimit_line => [<<$$, $\n>>]
+    , headLine => 1
+    , skipTopLines => 1
   };
 table_read_config(mcht_txn_acc) ->
 %%  [acc_index,mcht_id,txn_type,month_date,acc]
   #{
     field_map => #{
-      acc_index => <<"column1">>
-      , mcht_id => <<"column2">>
-      , txn_type => <<"column3">>
-      , month_date => <<"column4">>
-      , acc => <<"column5">>
+      acc_index => <<"acc_index">>
+      , mcht_id => <<"mcht_id">>
+      , txn_type => <<"txn_type">>
+      , month_date => <<"month_date">>
+      , acc => <<"acc">>
     }
     , delimit_field => [<<$^, $^>>]
     , delimit_line => [<<$$, $\n>>]
+    , headLine => 1
+    , skipTopLines => 1
   };
 table_read_config(users) ->
 %%  [id,name,email,password,role,status,last_update_ts, last_login_ts]
   #{
     field_map => #{
-      id => <<"column1">>
-      , name => <<"column2">>
-      , email => <<"column3">>
-      , password => <<"column4">>
-      , role => <<"column5">>
-      , status => <<"column6">>
-      , last_update_ts => <<"column7">>
-      , last_login_ts => <<"column8">>
+      id => <<"id">>
+      , name => <<"name">>
+      , email => <<"email">>
+      , password => <<"password">>
+      , role => <<"role">>
+      , status => <<"status">>
+      , last_update_ts => <<"last_update_ts">>
+      , last_login_ts => <<"last_login_ts">>
     }
     , delimit_field => [<<$^, $^>>]
     , delimit_line => [<<$$, $\n>>]
+    , headLine => 1
+    , skipTopLines => 1
   };
 table_read_config(mchants) ->
   #{
     field_map => #{
-      id => <<"column1">>
-      , mcht_full_name => <<"column2">>
-      , mcht_short_name => <<"column3">>
-      , status => <<"column4">>
-      , payment_method => <<"column5">>
-      , up_mcht_id => <<"column6">>
-      , quota => <<"column7">>
-      , up_term_no => <<"column8">>
-      , update_ts => <<"column9">>
+      id => <<"id">>
+      , mcht_full_name => <<"mcht_full_name">>
+      , mcht_short_name => <<"mcht_short_name">>
+      , status => <<"status">>
+      , payment_method => <<"payment_method">>
+      , up_mcht_id => <<"up_mcht_id">>
+      , quota => <<"quota">>
+      , up_term_no => <<"up_term_no">>
+      , update_ts => <<"update_ts">>
     }
     , delimit_field => [<<$^, $^>>]
     , delimit_line => [<<$$, $\n>>]
+    , headLine => 1
+    , skipTopLines => 1
   };
 table_read_config(mcht_txn_log) ->
   #{
     field_map => #{
 
-      mcht_index_key => <<"column1">>
-      , txn_type => <<"column2">>
-      , mcht_id => <<"column3">>
-      , mcht_txn_date => <<"column4">>
-      , mcht_txn_time => <<"column5">>
-      , mcht_txn_seq => <<"column6">>
-      , mcht_txn_amt => <<"column7">>
-      , mcht_order_desc => <<"column8">>
-      , gateway_id => <<"column9">>
-      , bank_id => <<"column10">>
-      , prod_id => <<"column11">>
-      , prod_bank_acct_id => <<"column12">>
-      , prod_bank_acct_corp_name => <<"column13">>
-      , prod_bank_name => <<"column14">>
-      , mcht_back_url => <<"column15">>
-      , mcht_front_url => <<"column16">>
-      , prod_memo => <<"column17">>
+      mcht_index_key => <<"mcht_index_key">>
+      , txn_type => <<"txn_type">>
+      , mcht_id => <<"mcht_id">>
+      , mcht_txn_date => <<"mcht_txn_date">>
+      , mcht_txn_time => <<"mcht_txn_time">>
+      , mcht_txn_seq => <<"mcht_txn_seq">>
+      , mcht_txn_amt => <<"mcht_txn_amt">>
+      , mcht_order_desc => <<"mcht_order_desc">>
+      , gateway_id => <<"gateway_id">>
+      , bank_id => <<"bank_id">>
+      , prod_id => <<"prod_id">>
+      , prod_bank_acct_id => <<"prod_bank_acct_id">>
+      , prod_bank_acct_corp_name => <<"prod_bank_acct_corp_name">>
+      , prod_bank_name => <<"prod_bank_name">>
+      , mcht_back_url => <<"mcht_back_url">>
+      , mcht_front_url => <<"mcht_front_url">>
+      , prod_memo => <<"prod_memo">>
 
-      , query_id => <<"column18">>
-      , settle_date => <<"column19">>
-      , quota => <<"column20">>
-      , resp_code => <<"column21">>
-      , resp_msg => <<"column22">>
+      , query_id => <<"query_id">>
+      , settle_date => <<"settle_date">>
+      , quota => <<"quota">>
+      , resp_code => <<"resp_code">>
+      , resp_msg => <<"resp_msg">>
 
-      , orig_mcht_txn_date => <<"column23">>
-      , orig_mcht_txn_seq => <<"column24">>
-      , orig_query_id => <<"column25">>
+      , orig_mcht_txn_date => <<"orig_mcht_txn_date">>
+      , orig_mcht_txn_seq => <<"orig_mcht_txn_seq">>
+      , orig_query_id => <<"orig_query_id">>
 
-      , txn_status => <<"column26">>
-      , bank_card_no => <<"column27">>
+      , txn_status => <<"txn_status">>
+      , bank_card_no => <<"bank_card_no">>
     }
     , delimit_field => [<<$^, $^>>]
     , delimit_line => [<<$$, $\n>>]
+    , headLine => 1
+    , skipTopLines => 1
   };
 table_read_config(up_txn_log) ->
   #{
     field_map => #{
 
-      mcht_index_key => <<"column1">>
-      , txn_type => <<"column2">>
+      mcht_index_key => <<"mcht_index_key">>
+      , txn_type => <<"txn_type">>
 
-      , up_merId => <<"column3">>
-      , up_txnTime => <<"column4">>
-      , up_orderId => <<"column5">>
-      , up_txnAmt => <<"column6">>
-      , up_reqReserved => <<"column7">>
-      , up_orderDesc => <<"column8">>
-      , up_issInsCode => <<"column9">>
-      , up_index_key => <<"column10">>
+      , up_merId => <<"up_merId">>
+      , up_txnTime => <<"up_txnTime">>
+      , up_orderId => <<"up_orderId">>
+      , up_txnAmt => <<"up_txnAmt">>
+      , up_reqReserved => <<"up_reqReserved">>
+      , up_orderDesc => <<"up_orderDesc">>
+      , up_issInsCode => <<"up_issInsCode">>
+      , up_index_key => <<"up_index_key">>
 
-      , up_queryId => <<"column11">>
-      , up_respCode => <<"column12">>
-      , up_respMsg => <<"column13">>
-      , up_settleAmt => <<"column14">>
-      , up_settleDate => <<"column15">>
-      , up_traceNo => <<"column16">>
-      , up_traceTime => <<"column17">>
+      , up_queryId => <<"up_queryId">>
+      , up_respCode => <<"up_respCode">>
+      , up_respMsg => <<"up_respMsg">>
+      , up_settleAmt => <<"up_settleAmt">>
+      , up_settleDate => <<"up_settleDate">>
+      , up_traceNo => <<"up_traceNo">>
+      , up_traceTime => <<"up_traceTime">>
 
-      , up_query_index_key => <<"column18">>
+      , up_query_index_key => <<"up_query_index_key">>
 
-      , txn_status => <<"column19">>
-      , up_accNo => <<"column20">>
+      , txn_status => <<"txn_status">>
+      , up_accNo => <<"up_accNo">>
     }
     , delimit_field => [<<$^, $^>>]
     , delimit_line => [<<$$, $\n>>]
+    , headLine => 1
+    , skipTopLines => 1
   }.
