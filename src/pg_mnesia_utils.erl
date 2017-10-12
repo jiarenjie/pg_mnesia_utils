@@ -96,7 +96,7 @@ handle_cast({restore, TableName, FileName},#state{} = State) ->
 %%%%  FileName = "/mnt/d/csv/"++atom_to_list(M)++".txt",
 %%  Total = csv_parser:read_line_fold(F, FileName, 500),
 
-  Bin = file:read_file(FileName),
+  {ok,Bin} = file:read_file(FileName),
   F = fun(Map, []) ->
     Mode = to_mode(Map, Fields, Config2, save),
     save(TableName,Mode,Fields),
