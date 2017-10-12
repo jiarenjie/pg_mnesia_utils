@@ -104,7 +104,7 @@ handle_cast({restore, TableName, FileName},#state{} = State) ->
     (Map, N) when is_integer(N) ->
       case (N rem 500) =:= 0  of
           true ->
-            lager:debug("restore table lines:~p", [N]);
+            lager:debug("restore table:~p lines:~p", [TableName,N]);
           _ -> []
       end,
       Mode = to_mode(Map, Fields, Config2, save),
