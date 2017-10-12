@@ -79,22 +79,40 @@ handle_cast({backup, TableName, FileName}, #state{} = State) ->
   {noreply, State};
 handle_cast({restore, TableName, FileName},#state{} = State) ->
   Config = table_read_config(TableName),
+  Config2 = table_deal_config(TableName),
   Fields = mnesia:table_info(TableName, attributes),
   lager:info("restore table: ~p to file :~ts start", [TableName, FileName]),
-  F = fun(Bin) ->
-    Lists = csv_parser:parse(Config, Bin),
-    Config2 = table_deal_config(TableName),
-    F2 = fun(Repo, Acc) ->
-      Mode = to_mode(Repo, Fields, Config2, save),
-%%      lager:debug("Mode:~p",[Mode]),
+%%  F = fun(Bin) ->
+%%    Lists = csv_parser:parse(Config, Bin),
+%%    F2 = fun(Repo, Acc) ->
+%%      Mode = to_mode(Repo, Fields, Config2, save),
+%%%%      lager:debug("Mode:~p",[Mode]),
+%%
+%%      save(TableName,Mode,Fields)
+%%%%      behaviour_repo:save(M, maps:from_list(Mode), [dirty])
+%%         end,
+%%    lists:foldl(F2, [], Lists)
+%%      end,
+%%%%  FileName = "/mnt/d/csv/"++atom_to_list(M)++".txt",
+%%  Total = csv_parser:read_line_fold(F, FileName, 500),
 
-      save(TableName,Mode,Fields)
-%%      behaviour_repo:save(M, maps:from_list(Mode), [dirty])
-         end,
-    lists:foldl(F2, [], Lists)
+  Bin = file:read_file(FileName),
+  F = fun(Map, []) ->
+    Mode = to_mode(Map, Fields, Config2, save),
+    save(TableName,Mode,Fields),
+    1;
+    (Map, N) when is_integer(N) ->
+      case (N rem 500) =:= 0  of
+          true ->
+            lager:debug("restore table lines:~p", [N]);
+          _ -> []
       end,
-%%  FileName = "/mnt/d/csv/"++atom_to_list(M)++".txt",
-  Total = csv_parser:read_line_fold(F, FileName, 500),
+      Mode = to_mode(Map, Fields, Config2, save),
+      save(TableName,Mode,Fields),
+      N + 1
+      end,
+  Total = csv_parser:parse(Config, Bin,F),
+
   lager:info("restore table: ~p to file : ~ts success,total: ~p", [TableName, FileName, Total]),
   {noreply, State};
 handle_cast(_Request, State) ->
