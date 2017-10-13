@@ -82,6 +82,7 @@ handle_cast({restore, TableName, FileName}, #state{} = State) ->
   Config2 = table_deal_config(TableName),
   Fields = mnesia:table_info(TableName, attributes),
   Delimit_field = maps:get(delimit_field, Config),
+  Delimit_line = maps:get(delimit_line, Config),
   lager:info("restore table: ~p to file :~ts start", [TableName, FileName]),
 %%  F = fun(Bin) ->
 %%    Lists = csv_parser:parse(Config, Bin),
@@ -115,9 +116,10 @@ handle_cast({restore, TableName, FileName}, #state{} = State) ->
 %%  {Total,_} = csv_parser:parse(Config, Bin,F),
 
   F = fun(Head, Line) ->
-    HeadLine = binary:split(Head, Delimit_field, [global]),
+    Delimit = lists:flatten([Delimit_field,Delimit_line]),
+    HeadLine = binary:split(Head, Delimit, [global]),
     HeadList = lists:map(fun(X) -> binary_to_atom(X, utf8) end, HeadLine),
-    Map = lists:zip(HeadList, binary:split(Line, Delimit_field, [global])),
+    Map = maps:from_list(lists:zip(HeadList, binary:split(Line, Delimit, [global]))),
     Mode = to_mode(Map, Fields, Config2, save),
     save(TableName, Mode, Fields)
     end,
