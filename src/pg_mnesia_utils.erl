@@ -102,7 +102,7 @@ handle_cast({restore, TableName, FileName},#state{} = State) ->
     save(TableName,Mode,Fields),
     {1,499};
     (Map, {Total,0}) when is_integer(Total) ->
-      lager:debug("restore table:~p lines:~p", [TableName,N]),
+      lager:debug("restore table:~p lines:~p", [TableName,Total]),
       Mode = to_mode(Map, Fields, Config2, save),
       save(TableName,Mode,Fields),
       {Total + 1,499};
