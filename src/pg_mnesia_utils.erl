@@ -117,7 +117,7 @@ handle_cast({restore, TableName, FileName}, #state{} = State) ->
 
   F = fun(Head, Line) ->
     Delimit = lists:flatten([Delimit_field,Delimit_line]),
-    HeadLine = binary:split(Head, Delimit, [global]),
+    HeadLine = binary:split(Head, Delimit, [global, trim]),
     HeadList = lists:map(fun(X) -> binary_to_atom(X, utf8) end, HeadLine),
     Map = maps:from_list(lists:zip(HeadList, binary:split(Line, Delimit, [global]))),
     Mode = to_mode(Map, Fields, Config2, save),
@@ -176,11 +176,11 @@ read_line(F, FileName, Fd, Head, {ok, Line}, [Toal, 0], LinesGap) ->
   lager:debug("read file line:~p ,total:~p", [FileName, Toal]),
   ok = F(Head, Line),
   Line2 = file:read_line(Fd),
-  read_line(F, FileName, Fd, Head, {ok, Line2}, [Toal + 1, 500], LinesGap);
+  read_line(F, FileName, Fd, Head, Line2, [Toal + 1, 500], LinesGap);
 read_line(F, FileName, Fd, Head, {ok, Line}, [Toal, N], LinesGap) ->
   ok = F(Head, Line),
   Line2 = file:read_line(Fd),
-  read_line(F, FileName, Fd, Head, {ok, Line2}, [Toal + 1, N - 1], LinesGap)
+  read_line(F, FileName, Fd, Head,  Line2, [Toal + 1, N - 1], LinesGap)
 .
 
 
