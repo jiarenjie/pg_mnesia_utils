@@ -119,7 +119,7 @@ handle_cast({restore, TableName, FileName}, #state{} = State) ->
     Delimit = lists:flatten([Delimit_field,Delimit_line]),
     HeadLine = binary:split(Head, Delimit, [global, trim]),
     HeadList = lists:map(fun(X) -> binary_to_atom(X, utf8) end, HeadLine),
-    Map = maps:from_list(lists:zip(HeadList, binary:split(Line, Delimit, [global]))),
+    Map = maps:from_list(lists:zip(HeadList, binary:split(Line, Delimit, [global, trim]))),
     Mode = to_mode(Map, Fields, Config2, save),
     save(TableName, Mode, Fields)
     end,
