@@ -49,7 +49,7 @@ handle_cast({backup, TableName, FileName}, #state{} = State) ->
   Delimit_line = maps:get(delimit_line, Table_read_config),
 
   %添加文件头
-  ValueList = lists:map(fun(Key) -> atom_to_binary(Key,utf8) end, Fields),
+  ValueList = lists:map(fun(Key) -> atom_to_binary(Key, utf8) end, Fields),
   %ValueList = maps:values(Repo),
   List = lists:join(Delimit_field, ValueList),
   List1 = lists:append(List, [Delimit_line]),
@@ -65,9 +65,9 @@ handle_cast({backup, TableName, FileName}, #state{} = State) ->
           lager:debug("Write ~p lines to file:~ts", [Total, FileName]),
           csv_parser:write_to_file(FileName, Acc, Fields, Delimit_field, Delimit_line, [append]),
           %% initial new empty acc
-          {1, [repo_to_mode(Repo,Fields, Config, write)], Total + N};
+          {1, [repo_to_mode(Repo, Fields, Config, write)], Total + N};
         (Repo, {N, Acc, Total}) ->
-          {N + 1, [repo_to_mode(Repo,Fields, Config, write) | Acc], Total}
+          {N + 1, [repo_to_mode(Repo, Fields, Config, write) | Acc], Total}
       end,
   F1 = fun() ->
     qlc:fold(F, {0, [], 0}, Qh)
@@ -77,10 +77,11 @@ handle_cast({backup, TableName, FileName}, #state{} = State) ->
   csv_parser:write_to_file(FileName, Rest, Fields, Delimit_field, Delimit_line, [append]),
   lager:info("Write table: ~p to file : ~ts success,total: ~p", [TableName, FileName, SubTotal + N]),
   {noreply, State};
-handle_cast({restore, TableName, FileName},#state{} = State) ->
+handle_cast({restore, TableName, FileName}, #state{} = State) ->
   Config = table_read_config(TableName),
   Config2 = table_deal_config(TableName),
   Fields = mnesia:table_info(TableName, attributes),
+  Delimit_field = maps:get(delimit_field, Config),
   lager:info("restore table: ~p to file :~ts start", [TableName, FileName]),
 %%  F = fun(Bin) ->
 %%    Lists = csv_parser:parse(Config, Bin),
@@ -96,25 +97,33 @@ handle_cast({restore, TableName, FileName},#state{} = State) ->
 %%%%  FileName = "/mnt/d/csv/"++atom_to_list(M)++".txt",
 %%  Total = csv_parser:read_line_fold(F, FileName, 500),
 
-  {ok,Bin} = file:read_file(FileName),
-  F = fun(Map, []) ->
-    Mode = to_mode(Map, Fields, Config2, save),
-    save(TableName,Mode,Fields),
-    {1,499};
-    (Map, {Total,0}) when is_integer(Total) ->
-      lager:debug("restore table:~p lines:~p", [TableName,Total]),
-      Mode = to_mode(Map, Fields, Config2, save),
-      save(TableName,Mode,Fields),
-      {Total + 1,499};
-    (Map, {Total,N}) when is_integer(Total) ->
-      Mode = to_mode(Map, Fields, Config2, save),
-      save(TableName,Mode,Fields),
-      {Total + 1,N-1}
-      end,
-  {Total,_} = csv_parser:parse(Config, Bin,F),
+%%  {ok,Bin} = file:read_file(FileName),
+%%  F = fun(Map, []) ->
+%%    Mode = to_mode(Map, Fields, Config2, save),
+%%    save(TableName,Mode,Fields),
+%%    {1,499};
+%%    (Map, {Total,0}) when is_integer(Total) ->
+%%      lager:debug("restore table:~p lines:~p", [TableName,Total]),
+%%      Mode = to_mode(Map, Fields, Config2, save),
+%%      save(TableName,Mode,Fields),
+%%      {Total + 1,499};
+%%    (Map, {Total,N}) when is_integer(Total) ->
+%%      Mode = to_mode(Map, Fields, Config2, save),
+%%      save(TableName,Mode,Fields),
+%%      {Total + 1,N-1}
+%%      end,
+%%  {Total,_} = csv_parser:parse(Config, Bin,F),
 
-  lager:info("restore table: ~p to file : ~ts success,total: ~p", [TableName, FileName, Total]),
-  {noreply, State};
+  F = fun(Head, Line) ->
+    HeadLine = binary:split(Head, Delimit_field, [global]),
+    HeadList = lists:map(fun(X) -> binary_to_atom(X, utf8) end, HeadLine),
+    Map = lists:zip(HeadList, binary:split(Line, Delimit_field, [global])),
+    Mode = to_mode(Map, Fields, Config2, save),
+    save(TableName, Mode, Fields)
+    end,
+    Total = read_line_fold(F, FileName, 500),
+    lager:info("restore table: ~p to file : ~ts success,total: ~p", [TableName, FileName, Total]),
+    {noreply, State};
 handle_cast(_Request, State) ->
   {noreply, State}.
 
@@ -126,11 +135,12 @@ terminate(_Reason, _State) ->
 
 code_change(_OldVsn, State, _Extra) ->
   {ok, State}.
+%=================================================================================================
 
-repo_to_mode(Repo,Fields, Config, Operate) ->
-  Map = repo_to_map(Repo,Fields),
+repo_to_mode(Repo, Fields, Config, Operate) ->
+  Map = repo_to_map(Repo, Fields),
 %%  lager:debug("Map = ~p", [Map]),
-  to_mode(Map,Fields,Config,Operate).
+  to_mode(Map, Fields, Config, Operate).
 
 repo_to_map(Repo, Fields) ->
   ValueList = tl(tuple_to_list(Repo)),
@@ -139,6 +149,41 @@ repo_to_map(Repo, Fields) ->
   maps:from_list(List).
 
 %%================================================================================================
+read_line_fold(F, FileName, LinesGap) ->
+  {ok, Fd} = file:open(FileName, [raw, binary]),
+  Total = read_line(F, FileName, Fd, LinesGap),
+  file:close(Fd),
+  Total.
+
+
+read_line(F, FileName, Fd, LinesGap) ->
+  Head = file:read_line(Fd),
+  read_line(F, FileName, Fd, Head, LinesGap).
+
+read_line(_F, FileName, _Fd, eof, _) ->
+  lager:info("The file:~p is empty", [FileName]),
+  0;
+read_line(F, FileName, Fd, {ok, Head}, LinesGap) ->
+  Line = file:read_line(Fd),
+  read_line(F, FileName, Fd, Head, Line, [0, 500], LinesGap).
+
+read_line(F, FileName, Fd, Head, eof, [Total, N], LinesGap) ->
+  lager:debug("The file:~p is end", [FileName]),
+  Total;
+read_line(F, FileName, Fd, Head, {ok, Line}, [Toal, 0], LinesGap) ->
+  lager:debug("read file line:~p ,total:~p", [FileName, Toal]),
+  ok = F(Head, Line),
+  Line2 = file:read_line(Fd),
+  read_line(F, FileName, Fd, Head, {ok, Line2}, [Toal + 1, 500], LinesGap);
+read_line(F, FileName, Fd, Head, {ok, Line}, [Toal, N], LinesGap) ->
+  ok = F(Head, Line),
+  Line2 = file:read_line(Fd),
+  read_line(F, FileName, Fd, Head, {ok, Line2}, [Toal + 1, N - 1], LinesGap)
+.
+
+
+%%================================================================================================
+
 
 to_mode(X, Fields, Config, Operate) ->
   F = fun out_2_model_one_field/2,
@@ -146,11 +191,11 @@ to_mode(X, Fields, Config, Operate) ->
   VL
 .
 out_2_model_one_field(Field, {Acc, Model2OutMap, PL, Operate}) when is_atom(Field), is_list(Acc), is_map(Model2OutMap) ->
-  Config = maps:get(Field, Model2OutMap,undefined),
+  Config = maps:get(Field, Model2OutMap, undefined),
 
 %%  lager:debug("Config=~p,Field=~p", [Config, Field]),
 
-  Value = do_out_2_model_one_field({maps:get(Field, PL,<<"undefined">>), Config}, Operate),
+  Value = do_out_2_model_one_field({maps:get(Field, PL, <<"undefined">>), Config}, Operate),
   %% omit undefined key/value , which means not appear in PL
 
   AccNew = [{Field, Value} | Acc],
@@ -194,12 +239,12 @@ do_out_2_model_one_field({Value, F}, save) when is_function(F) ->
   F(Value, save).
 %%================================================================================================
 
-save(TableName,Mode, Fields) ->
+save(TableName, Mode, Fields) ->
   Map = maps:from_list(Mode),
   F = fun(Field) ->
-    maps:get(Field,Map)
-    end,
-  Lists = lists:map(F,Fields),
+    maps:get(Field, Map)
+      end,
+  Lists = lists:map(F, Fields),
   %% 将map 转换为 能保存的 touple
-  Repo = erlang:list_to_tuple([ TableName | Lists ]),
-  ok = mnesia:dirty_write(TableName,Repo).
+  Repo = erlang:list_to_tuple([TableName | Lists]),
+  ok = mnesia:dirty_write(TableName, Repo).
