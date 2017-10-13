@@ -116,10 +116,11 @@ handle_cast({restore, TableName, FileName}, #state{} = State) ->
 %%  {Total,_} = csv_parser:parse(Config, Bin,F),
 
   F = fun(Head, Line) ->
-    Delimit = lists:flatten([Delimit_field,Delimit_line]),
-    HeadLine = binary:split(Head, Delimit, [global, trim]),
+    [HeadWithOutEnd] = binary:split(Head, Delimit_line, [global, trim]),
+    [LineWithOutEnd] = binary:split(Line, Delimit_line, [global, trim]),
+    HeadLine = binary:split(Head, HeadWithOutEnd, [global]),
     HeadList = lists:map(fun(X) -> binary_to_atom(X, utf8) end, HeadLine),
-    Map = maps:from_list(lists:zip(HeadList, binary:split(Line, Delimit, [global, trim]))),
+    Map = maps:from_list(lists:zip(HeadList, binary:split(LineWithOutEnd, Delimit_field, [global]))),
     Mode = to_mode(Map, Fields, Config2, save),
     save(TableName, Mode, Fields)
     end,
