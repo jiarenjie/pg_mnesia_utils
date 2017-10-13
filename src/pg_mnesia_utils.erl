@@ -177,7 +177,7 @@ read_line(F, FileName, Fd, Head, {ok, Line}, [Toal, 0], LinesGap) ->
   lager:debug("read file line:~p ,total:~p", [FileName, Toal]),
   ok = F(Head, Line),
   Line2 = file:read_line(Fd),
-  read_line(F, FileName, Fd, Head, Line2, [Toal + 1, 500], LinesGap);
+  read_line(F, FileName, Fd, Head, Line2, [Toal + 1, 499], LinesGap);
 read_line(F, FileName, Fd, Head, {ok, Line}, [Toal, N], LinesGap) ->
   ok = F(Head, Line),
   Line2 = file:read_line(Fd),
