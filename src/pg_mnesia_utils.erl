@@ -100,18 +100,18 @@ handle_cast({restore, TableName, FileName},#state{} = State) ->
   F = fun(Map, []) ->
     Mode = to_mode(Map, Fields, Config2, save),
     save(TableName,Mode,Fields),
-    1;
-    (Map, N) when is_integer(N) ->
-      case (N rem 500) =:= 0  of
-          true ->
-            lager:debug("restore table:~p lines:~p", [TableName,N]);
-          _ -> []
-      end,
+    {1,499};
+    (Map, {Total,0}) when is_integer(Total) ->
+      lager:debug("restore table:~p lines:~p", [TableName,N]),
       Mode = to_mode(Map, Fields, Config2, save),
       save(TableName,Mode,Fields),
-      N + 1
+      {Total + 1,499};
+    (Map, {Total,N}) when is_integer(Total) ->
+      Mode = to_mode(Map, Fields, Config2, save),
+      save(TableName,Mode,Fields),
+      {Total + 1,N-1}
       end,
-  Total = csv_parser:parse(Config, Bin,F),
+  {Total,_} = csv_parser:parse(Config, Bin,F),
 
   lager:info("restore table: ~p to file : ~ts success,total: ~p", [TableName, FileName, Total]),
   {noreply, State};
