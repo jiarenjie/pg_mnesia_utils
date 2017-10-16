@@ -143,7 +143,7 @@ code_change(_OldVsn, State, _Extra) ->
 repo_to_mode(Repo, Fields, Config, Operate) ->
   Map = repo_to_map(Repo, Fields),
 %%  lager:debug("Map = ~p", [Map]),
-  to_mode(Map, Fields, Config, Operate).
+  to_model(Map, Fields, Config, Operate).
 
 repo_to_map(Repo, Fields) ->
   ValueList = tl(tuple_to_list(Repo)),
