@@ -121,8 +121,8 @@ handle_cast({restore, TableName, FileName}, #state{} = State) ->
     HeadLine = binary:split(HeadWithOutEnd, Delimit_field, [global]),
     HeadList = lists:map(fun(X) -> binary_to_atom(X, utf8) end, HeadLine),
     Map = maps:from_list(lists:zip(HeadList, binary:split(LineWithOutEnd, Delimit_field, [global]))),
-    Mode = to_mode(Map, Fields, Config2, save),
-    save(TableName, Mode, Fields)
+    Model = to_model(Map, Fields, Config2, save),
+    save(TableName, Model, Fields)
     end,
     Total = read_line_fold(F, FileName, 500),
     lager:info("restore table: ~p to file : ~ts success,total: ~p", [TableName, FileName, Total]),
@@ -158,11 +158,10 @@ read_line_fold(F, FileName, LinesGap) ->
   file:close(Fd),
   Total.
 
-
 read_line(F, FileName, Fd, LinesGap) ->
+  %%首先先读一行头文件
   Head = file:read_line(Fd),
   read_line(F, FileName, Fd, Head, LinesGap).
-
 read_line(_F, FileName, _Fd, eof, _) ->
   lager:info("The file:~p is empty", [FileName]),
   0;
@@ -188,7 +187,7 @@ read_line(F, FileName, Fd, Head, {ok, Line}, [Toal, N], LinesGap) ->
 %%================================================================================================
 
 
-to_mode(X, Fields, Config, Operate) ->
+to_model(X, Fields, Config, Operate) ->
   F = fun out_2_model_one_field/2,
   {VL, _, _, _} = lists:foldl(F, {[], Config, X, Operate}, Fields),
   VL
