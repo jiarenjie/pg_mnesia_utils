@@ -15,10 +15,10 @@
 
 
 table_deal_config() ->
-  table_mchants:table_deal_config().
+  table_mcht_txn_log:table_deal_config().
 
 table_read_config() ->
-  table_mchants:table_read_config().
+  table_mcht_txn_log:table_read_config().
 
 table_name() ->
   history_mcht_txn_log.
