@@ -57,8 +57,8 @@ cleanup(Pid) ->
   ok.
 
 test_1() ->
-  ok = pg_mnesia_utils:restore(mchants,"tests/mchants.txt"),
-  ok = pg_mnesia_utils:backup(mchants,"tests/mchants2.txt"),
+  ok = pg_mnesia_utils:restore(table_mchants,"tests/mchants.txt"),
+  ok = pg_mnesia_utils:backup(table_mchants,"tests/mchants2.txt"),
   {ok,BdBackup} = file:read_file("tests/mchants.txt"),
   {ok,BdBackup2} = file:read_file("tests/mchants2.txt"),
   ?assertEqual(BdBackup,BdBackup2),
