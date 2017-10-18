@@ -39,12 +39,14 @@ restore(TableName, FileName) ->
 handle_call(_Request, _From, State) ->
   {noreply, State}.
 
-handle_cast({backup, TableName, FileName}, #state{} = State) ->
+handle_cast({backup, M, FileName}, #state{} = State) ->
 
+
+  TableName = table_behaviour:get_table_name(M),
   Qh = mnesia:table(TableName),
   Fields = mnesia:table_info(TableName, attributes),
-  Config = table_deal_config(TableName),
-  Table_read_config = table_read_config(TableName),
+  Config = table_behaviour:get_table_deal_config(M),
+  Table_read_config = table_behaviour:get_table_read_config(M),
   Delimit_field = maps:get(delimit_field, Table_read_config),
   Delimit_line = maps:get(delimit_line, Table_read_config),
 
@@ -77,9 +79,13 @@ handle_cast({backup, TableName, FileName}, #state{} = State) ->
   csv_parser:write_to_file(FileName, Rest, Fields, Delimit_field, Delimit_line, [append]),
   lager:info("Write table: ~p to file : ~ts success,total: ~p", [TableName, FileName, SubTotal + N]),
   {noreply, State};
-handle_cast({restore, TableName, FileName}, #state{} = State) ->
-  Config = table_read_config(TableName),
-  Config2 = table_deal_config(TableName),
+handle_cast({restore, M, FileName}, #state{} = State) ->
+
+  TableName = table_behaviour:get_table_name(M),
+
+  Config = table_behaviour:get_table_deal_config(M),
+  Config2 = table_behaviour:get_table_read_config(M),
+
   Fields = mnesia:table_info(TableName, attributes),
   Delimit_field = maps:get(delimit_field, Config),
   Delimit_line = maps:get(delimit_line, Config),
