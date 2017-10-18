@@ -83,8 +83,8 @@ handle_cast({restore, M, FileName}, #state{} = State) ->
 
   TableName = table_behaviour:get_table_name(M),
 
-  Config = table_behaviour:get_table_deal_config(M),
-  Config2 = table_behaviour:get_table_read_config(M),
+  Config = table_behaviour:get_table_read_config(M),
+  Config2 = table_behaviour:get_table_deal_config(M),
 
   Fields = mnesia:table_info(TableName, attributes),
   Delimit_field = maps:get(delimit_field, Config),
